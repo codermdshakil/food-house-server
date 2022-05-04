@@ -57,11 +57,10 @@ async function main() {
         })
 
         // increment quantity number 
-        app.put('/product/:id', async(req, res) => {
+        app.put('/product/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const updated = req.body;
-            console.log(updated)
             const options = { upsert: true };
             const updateDoc = {
                 $set: {
@@ -70,6 +69,14 @@ async function main() {
             };
             const result = await productCollection.updateOne(query, updateDoc, options);
             res.send(result)
+        })
+
+        // items delete method 
+        app.delete('/items/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = {_id:ObjectId(id)};
+            const result = await productCollection.deleteOne(query);
+            res.send(result);
         })
 
 
