@@ -25,7 +25,7 @@ async function main() {
         const productCollection = await client.db('storedProducts').collection('products');
 
         // get products 
-        app.get('/products', async(req, res) => {
+        app.get('/products', async (req, res) => {
             const query = {};
             const cursor = productCollection.find(query);
             const products = await cursor.toArray()
@@ -33,22 +33,22 @@ async function main() {
         })
 
         // get one product 
-        app.get('/products/:id', async(req, res) => {
+        app.get('/products/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id:ObjectId(id)};
+            const query = { _id: ObjectId(id) };
             const result = await productCollection.findOne(query);
             res.send(result);
         })
 
-        app.put('/products/:id', async(req, res) => {
+        // decremnet quantity number 
+        app.put('/products/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id:ObjectId(id)};
+            const query = { _id: ObjectId(id) };
             const newQuantity = req.body;
-            console.log(newQuantity.result)
             const options = { upsert: true };
             const updateDoc = {
                 $set: {
-                    quantity:newQuantity.result
+                    quantity: newQuantity.result
                 }
             };
 
@@ -56,7 +56,22 @@ async function main() {
             res.send(result)
         })
 
-        
+        // increment quantity number 
+        app.put('/product/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const updated = req.body;
+            console.log(updated)
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    quantity: updated.inputValue
+                }
+            };
+            const result = await productCollection.updateOne(query, updateDoc, options);
+            res.send(result)
+        })
+
 
     }
     catch (e) {
@@ -65,7 +80,7 @@ async function main() {
     finally {
 
         // await client.close() 
-   
+
     }
 }
 main().catch(console.error);
