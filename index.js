@@ -4,6 +4,7 @@ const port = process.env.PORT || 5000;
 const cors = require('cors');
 require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { get } = require('express/lib/response');
 const objectId = require('mongodb').ObjectId;
 
 
@@ -31,11 +32,28 @@ async function main() {
             res.send(products);
         })
 
+        // get one product 
         app.get('/products/:id', async(req, res) => {
             const id = req.params.id;
             const query = {_id:ObjectId(id)};
             const result = await productCollection.findOne(query);
             res.send(result);
+        })
+
+        app.put('/products/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {_id:ObjectId(id)};
+            const newQuantity = req.body;
+            console.log(newQuantity.result)
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    quantity:newQuantity.result
+                }
+            };
+
+            const result = await productCollection.updateOne(query, updateDoc, options);
+            res.send(result)
         })
 
         
