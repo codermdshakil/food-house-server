@@ -78,6 +78,13 @@ async function main() {
             const result = await productCollection.deleteOne(query);
             res.send(result);
         })
+        
+        // use post method create a item 
+        app.post('/products', async(req, res) => {
+            const item = req.body;
+            const addeditem = await productCollection.insertOne(item);
+            res.send(addeditem);
+        })
 
     }
     catch (e) {
