@@ -24,6 +24,9 @@ async function main() {
         await client.connect();
         const productCollection = await client.db('storedProducts').collection('products');
 
+        // testimonial Data 
+        const testimonialCollection = await client.db('testimonialClient').collection('client');
+
         // get products 
         app.get('/products', async (req, res) => {
             const query = {};
@@ -74,16 +77,24 @@ async function main() {
         // items delete method 
         app.delete('/items/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id:ObjectId(id)};
+            const query = { _id: ObjectId(id) };
             const result = await productCollection.deleteOne(query);
             res.send(result);
         })
-        
+
         // use post method create a item 
-        app.post('/products', async(req, res) => {
+        app.post('/products', async (req, res) => {
             const item = req.body;
             const addeditem = await productCollection.insertOne(item);
             res.send(addeditem);
+        })
+
+        // clients
+        app.get('/clients', async(req, res) => {
+            const query = {};
+            const cursor = testimonialCollection.find(query);
+            const client = await cursor.toArray()
+            res.send(client);
         })
 
     }
