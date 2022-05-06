@@ -24,6 +24,7 @@ async function main() {
         await client.connect();
         const productCollection = await client.db('storedProducts').collection('products');
         const newsCollection = await client.db('allNews').collection('news');
+        const clientCollection = await client.db('allClients').collection('clients')
 
 
         // get products 
@@ -88,7 +89,7 @@ async function main() {
             res.send(addeditem);
         })
 
-        // new data get 
+        // news data get 
         app.get('/news', async(req, res) => {
             const query = {};
             const cursor = newsCollection.find(query);
@@ -96,6 +97,13 @@ async function main() {
             res.send(result);
         })
 
+        // clients data get 
+        app.get('/clients', async(req, res) => {
+            const query = {};
+            const cursor = clientCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
+        })
 
 
     }
