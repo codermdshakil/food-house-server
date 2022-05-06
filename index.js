@@ -23,9 +23,8 @@ async function main() {
 
         await client.connect();
         const productCollection = await client.db('storedProducts').collection('products');
+        const newsCollection = await client.db('allNews').collection('news');
 
-        // testimonial Data 
-        const testimonialCollection = await client.db('testimonialClient').collection('client');
 
         // get products 
         app.get('/products', async (req, res) => {
@@ -89,13 +88,15 @@ async function main() {
             res.send(addeditem);
         })
 
-        // clients
-        app.get('/clients', async(req, res) => {
+        // new data get 
+        app.get('/news', async(req, res) => {
             const query = {};
-            const cursor = testimonialCollection.find(query);
-            const client = await cursor.toArray()
-            res.send(client);
+            const cursor = newsCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
         })
+
+
 
     }
     catch (e) {
