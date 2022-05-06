@@ -2,6 +2,8 @@ const express = require('express');
 const app = express();
 const port = process.env.PORT || 5000;
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
+
 require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const { get } = require('express/lib/response');
@@ -11,6 +13,24 @@ const objectId = require('mongodb').ObjectId;
 // middlewares 
 app.use(cors());
 app.use(express.json());
+
+
+function verifyToken(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).send({ message: "unauthorized access" })
+    }
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.SECRET_TOKEN, (err, decoded) => {
+        if (err) {
+            res.status(403, ({ message: 'Forbidden access' }))
+        }
+        req.decoded = decoded;
+        console.log('decoded', decoded);
+
+    })
+    next();
+}
 
 
 async function main() {
@@ -26,6 +46,14 @@ async function main() {
         const newsCollection = await client.db('allNews').collection('news');
         const clientCollection = await client.db('allClients').collection('clients')
 
+        // user token 
+        app.post('/gettoken', async (req, res) => {
+            const user = req.body;
+            const token = jwt.sign(user, process.env.SECRET_TOKEN, {
+                expiresIn: '1d'
+            });
+            res.send({ token });
+        })
 
         // get products 
         app.get('/products', async (req, res) => {
@@ -90,17 +118,25 @@ async function main() {
         })
 
         // get login user items 
-        app.get('/myitems', async(req, res) => {
+        app.get('/myitems', verifyToken, async (req, res) => {
+
+            const decodedEmail = req.decoded.email;
             const email = req.query.email;
-            console.log(email)
-            const query = {email:email};
-            const cursor = productCollection.find(query);
-            const myItems = await cursor.toArray()
-            res.send(myItems);
+
+            if (email === decodedEmail) {
+                const query = { email: email };
+                const cursor = productCollection.find(query);
+                const myItems = await cursor.toArray()
+                res.send(myItems);
+            }
+            else{
+                res.status(403).send({message:"forbidden access"})
+            }
+
         })
 
         // delete my item
-        app.delete('/myitem/:id', async(req, res) => {
+        app.delete('/myitem/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const result = await productCollection.deleteOne(query);
@@ -108,7 +144,7 @@ async function main() {
         })
 
         // news data get 
-        app.get('/news', async(req, res) => {
+        app.get('/news', async (req, res) => {
             const query = {};
             const cursor = newsCollection.find(query);
             const result = await cursor.toArray();
@@ -116,7 +152,7 @@ async function main() {
         })
 
         // clients data get 
-        app.get('/clients', async(req, res) => {
+        app.get('/clients', async (req, res) => {
             const query = {};
             const cursor = clientCollection.find(query);
             const result = await cursor.toArray();
