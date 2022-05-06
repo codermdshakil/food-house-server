@@ -91,12 +91,20 @@ async function main() {
 
         // get login user items 
         app.get('/myitems', async(req, res) => {
-            const email = req.params;
+            const email = req.query.email;
             console.log(email)
-            const query = {};
+            const query = {email:email};
             const cursor = productCollection.find(query);
             const myItems = await cursor.toArray()
             res.send(myItems);
+        })
+
+        // delete my item
+        app.delete('/myitem/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await productCollection.deleteOne(query);
+            res.send(result);
         })
 
         // news data get 
