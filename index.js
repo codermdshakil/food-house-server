@@ -89,6 +89,16 @@ async function main() {
             res.send(addeditem);
         })
 
+        // get login user items 
+        app.get('/myitems', async(req, res) => {
+            const email = req.params;
+            console.log(email)
+            const query = {};
+            const cursor = productCollection.find(query);
+            const myItems = await cursor.toArray()
+            res.send(myItems);
+        })
+
         // news data get 
         app.get('/news', async(req, res) => {
             const query = {};
