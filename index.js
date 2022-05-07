@@ -6,7 +6,6 @@ const jwt = require('jsonwebtoken');
 
 require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const { get } = require('express/lib/response');
 const objectId = require('mongodb').ObjectId;
 
 
@@ -27,9 +26,9 @@ function verifyToken(req, res, next) {
         }
         req.decoded = decoded;
         console.log('decoded', decoded);
-
+        next();
     })
-    next();
+
 }
 
 
@@ -119,18 +118,16 @@ async function main() {
 
         // get login user items 
         app.get('/myitems', verifyToken, async (req, res) => {
-
             const decodedEmail = req.decoded.email;
             const email = req.query.email;
-
             if (email === decodedEmail) {
                 const query = { email: email };
                 const cursor = productCollection.find(query);
                 const myItems = await cursor.toArray()
                 res.send(myItems);
             }
-            else{
-                res.status(403).send({message:"forbidden access"})
+            else {
+                res.status(403).send({ message: "forbidden access" })
             }
 
         })
